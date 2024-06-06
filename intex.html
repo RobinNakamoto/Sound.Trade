@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundTrade</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #282c34;
+            color: white;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            width: 80%;
+            max-width: 300px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="input-section">
+        <h1>Welcome to SoundTrade!</h1>
+        <p>Enter your aggr.trade Workspace Name:</p>
+        <input type="text" id="workspace-name" placeholder="e.g., robin-nakamoto" />
+        <button onclick="startStreaming()">LFG! 🚀</button>
+        <p id="instructions">
+            <small>
+                To find your Workspace Name, go to your aggr.trade account page and look at the URL.
+                For example, in <code>https://aggr.trade/robin-nakamoto</code>, the Workspace Name is <strong>robin-nakamoto</strong>.
+            </small>
+        </p>
+    </div>
+    <div id="audio-section" class="hidden">
+        <h1>Streaming from <span id="workspace-display"></span></h1>
+        <button onclick="toggleAudio()">Play/Stop Audio</button>
+    </div>
+
+    <script>
+        let audioPlaying = false;
+        let audioContext;
+        let audioElement;
+
+        function startStreaming() {
+            const workspaceName = document.getElementById('workspace-name').value.trim();
+            if (workspaceName) {
+                document.getElementById('input-section').classList.add('hidden');
+                document.getElementById('audio-section').classList.remove('hidden');
+                document.getElementById('workspace-display').textContent = workspaceName;
+                playAudio(workspaceName);
+            } else {
+                alert("Please enter a valid Workspace Name.");
+            }
+        }
+
+        function toggleAudio() {
+            if (audioPlaying) {
+                stopAudio();
+            } else {
+                const workspaceName = document.getElementById('workspace-name').value.trim();
+                playAudio(workspaceName);
+            }
+        }
+
+        function playAudio(workspaceName) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioElement = new Audio(`https://aggr.trade/${workspaceName}`);
+                const track = audioContext.createMediaElementSource(audioElement);
+                track.connect(audioContext.destination);
+            }
+            audioElement.play();
+            audioPlaying = true;
+        }
+
+        function stopAudio() {
+            if (audioElement) {
+                audioElement.pause();
+                audioPlaying = false;
+            }
+        }
+    </script>
+</body>
+</html>
