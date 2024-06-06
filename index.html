@@ -23,7 +23,7 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        input {
+        input[type="file"] {
             padding: 10px;
             font-size: 16px;
             margin-bottom: 10px;
@@ -36,20 +36,14 @@
     </style>
 </head>
 <body>
-    <div id="input-section">
+    <div id="upload-section">
         <h1>Welcome to SoundTrade!</h1>
-        <p>Enter your aggr.trade Workspace Name:</p>
-        <input type="text" id="workspace-name" placeholder="e.g., robin-nakamoto" />
-        <button onclick="startStreaming()">LFG! 🚀</button>
-        <p id="instructions">
-            <small>
-                To find your Workspace Name, go to your aggr.trade account page and look at the URL.
-                For example, in <code>https://aggr.trade/robin-nakamoto</code>, the Workspace Name is <strong>robin-nakamoto</strong>.
-            </small>
-        </p>
+        <p>Upload your aggr.trade workspace JSON file:</p>
+        <input type="file" id="workspace-file" accept=".json" />
+        <button onclick="loadWorkspace()">LFG! 🚀</button>
     </div>
     <div id="audio-section" class="hidden">
-        <h1>Streaming from <span id="workspace-display"></span></h1>
+        <h1>Streaming from your Workspace</h1>
         <button onclick="toggleAudio()">Play/Stop Audio</button>
     </div>
 
@@ -58,15 +52,27 @@
         let audioContext;
         let audioElement;
 
-        function startStreaming() {
-            const workspaceName = document.getElementById('workspace-name').value.trim();
-            if (workspaceName) {
-                document.getElementById('input-section').classList.add('hidden');
-                document.getElementById('audio-section').classList.remove('hidden');
-                document.getElementById('workspace-display').textContent = workspaceName;
-                playAudio(workspaceName);
+        function loadWorkspace() {
+            const fileInput = document.getElementById('workspace-file');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const content = event.target.result;
+                    try {
+                        const workspaceConfig = JSON.parse(content);
+                        console.log('Workspace loaded:', workspaceConfig);
+                        document.getElementById('upload-section').classList.add('hidden');
+                        document.getElementById('audio-section').classList.remove('hidden');
+                        // You can now use the workspaceConfig to set up your streaming as needed.
+                    } catch (error) {
+                        alert('Error parsing JSON file. Please make sure it is a valid workspace file.');
+                    }
+                };
+                reader.readAsText(file);
             } else {
-                alert("Please enter a valid Workspace Name.");
+                alert('Please upload a workspace JSON file.');
             }
         }
 
@@ -74,15 +80,14 @@
             if (audioPlaying) {
                 stopAudio();
             } else {
-                const workspaceName = document.getElementById('workspace-name').value.trim();
-                playAudio(workspaceName);
+                playAudio();
             }
         }
 
-        function playAudio(workspaceName) {
+        function playAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                audioElement = new Audio(`https://aggr.trade/${workspaceName}`);
+                audioElement = new Audio(`https://aggr.trade/your-default-workspace`);
                 const track = audioContext.createMediaElementSource(audioElement);
                 track.connect(audioContext.destination);
             }
